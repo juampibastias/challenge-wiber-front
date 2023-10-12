@@ -5,6 +5,7 @@ import Joi from 'joi';
 import ScriptForm from './components/ScriptForm';
 import LanguageDisplay from './components/LanguageDisplay';
 import ScriptList from './components/ScriptList';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     const [scripts, setScripts] = useState([]);

@@ -1,5 +1,6 @@
 import React from 'react';
 import Swal from 'sweetalert2';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function ScriptForm({
     value,
@@ -65,32 +66,39 @@ function ScriptForm({
     };
 
     return (
-        <div>
-            <div style={{ display: 'flex', justifyContent: 'center' }}>
-                <input
-                    type='text'
-                    placeholder='Nombre del script'
-                    value={scriptName}
-                    onChange={onNameChange}
-                />
-                <textarea
-                    style={{ padding: '20%' }}
-                    type='text'
-                    value={value}
-                    onChange={onChange}
-                    placeholder='Ingresa aquí tu script'
-                />
-                {error && <div className='error-message'>{error}</div>}
-            </div>
-            <div
-                style={{
-                    display: 'flex',
-                    justifyContent: 'center',
-                    marginTop: '10px',
-                }}
-            >
-                <button onClick={onSubmit}>Agregar Script</button>
-            </div>
+        <div className='d-flex justify-content-center'>
+            <form className='was-validated w-50 justify-content-center'>
+                <div>
+                    <label for='validationTextarea' className='form-label'>
+                        Dale un nombre a tú script.
+                    </label>
+                    <input
+                        className='form-control'
+                        type='text'
+                        placeholder='Nombre del script'
+                        value={scriptName}
+                        onChange={onNameChange}
+                    />
+                </div>
+                <div className='mb-3 mt-5'>
+                    <label for='validationTextarea' class='form-label'>
+                        Escribe aquí tu script.
+                    </label>
+                    <textarea
+                        className='form-control'
+                        type='text'
+                        value={value}
+                        onChange={onChange}
+                        placeholder='Ingresa aquí tu script'
+                    ></textarea>
+                </div>
+
+                <div class='mb-3'>
+                    <button className='btn btn-primary' onClick={onSubmit}>
+                        Agregar script
+                    </button>
+                </div>
+            </form>
         </div>
     );
 }
