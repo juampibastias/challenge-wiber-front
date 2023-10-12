@@ -23,7 +23,12 @@ function App() {
     };
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/scripts')
+        fetch('http://localhost:5000/api/scripts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
             .then((response) => response.json())
             .then((data) => setScripts(data));
     }, []);
@@ -50,7 +55,6 @@ function App() {
     const handleSubmit = async () => {
         try {
             if (editingScript) {
-                // Si hay un script en edición, realiza una solicitud PUT para actualizar el script existente
                 const response = await fetch(
                     `http://localhost:5000/api/scripts/${editingScript.id}`,
                     {
@@ -58,12 +62,14 @@ function App() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ script: newScript }),
+                        body: JSON.stringify({
+                            name: scriptName,
+                            script: newScript,
+                        }),
                     }
                 );
 
                 if (response.ok) {
-                    // Si la actualización fue exitosa, actualiza el script en el estado y la lista de scripts
                     const updatedScript = await response.json();
                     setScripts(
                         scripts.map((script) =>
@@ -79,7 +85,6 @@ function App() {
                     console.error('Error al actualizar el script');
                 }
             } else {
-                // Si no hay un script en edición, realiza una solicitud POST para crear un nuevo script
                 const response = await fetch(
                     'http://localhost:5000/api/scripts',
                     {
@@ -95,7 +100,6 @@ function App() {
                 );
 
                 if (response.ok) {
-                    // Si la creación fue exitosa, agrega el nuevo script al estado de los scripts
                     const data = await response.json();
                     setScripts([...scripts, data]);
                     setNewScript('');
@@ -151,7 +155,7 @@ function App() {
                 onChange={(e) => setNewScript(e.target.value)}
                 onSubmit={handleSubmit}
                 error={validationError}
-                onEditClick={handleEdit} // Asegúrate de pasar handleEdit como onEditClick
+                onEditClick={handleEdit}
                 scriptId={editingScript ? editingScript.id : null}
             />
 

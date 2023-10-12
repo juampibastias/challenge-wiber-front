@@ -35,7 +35,8 @@ function ScriptList({ scripts, onDelete }) {
                                 'Script actualizado correctamente.',
                                 'success'
                             );
-                            // También puedes agregar lógica para actualizar el estado si es necesario
+                            // Actualizar el estado si es necesario
+                            // Tu código aquí para actualizar el estado si es necesario
                         } else {
                             // Si hay un error en la solicitud, mostrar SweetAlert de error
                             Swal.fire(
