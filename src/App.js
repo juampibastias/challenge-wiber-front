@@ -12,11 +12,13 @@ function App() {
     const [validationError, setValidationError] = useState(null);
     const [scriptLanguage, setScriptLanguage] = useState(null);
     const [editingScript, setEditingScript] = useState(null);
+    const [scriptName, setScriptName] = useState('');
 
     const handleEdit = (scriptId) => {
         const scriptToEdit = scripts.find((script) => script.id === scriptId);
         setEditingScript(scriptToEdit);
         setNewScript(scriptToEdit.text);
+        setScriptName(scriptToEdit.name); // Asegúrate de establecer el nombre del script
     };
 
     useEffect(() => {
@@ -84,7 +86,10 @@ function App() {
                         headers: {
                             'Content-Type': 'application/json',
                         },
-                        body: JSON.stringify({ script: newScript }),
+                        body: JSON.stringify({
+                            name: scriptName,
+                            script: newScript,
+                        }),
                     }
                 );
 
@@ -128,13 +133,27 @@ function App() {
 
     return (
         <div className='App'>
-            <h1>Scripts</h1>
+            <div
+                className='logo-img'
+                style={{ display: 'flex', justifyContent: 'center' }}
+            >
+                <img
+                    src='./ADD-removebg-preview.png'
+                    className='img-fluid'
+                    alt='Logo'
+                />
+            </div>
             <ScriptForm
+                scriptName={scriptName}
+                onNameChange={(e) => setScriptName(e.target.value)}
                 value={newScript}
                 onChange={(e) => setNewScript(e.target.value)}
                 onSubmit={handleSubmit}
                 error={validationError}
+                onEditClick={handleEdit} // Asegúrate de pasar handleEdit como onEditClick
+                scriptId={editingScript ? editingScript.id : null}
             />
+
             {scriptLanguage && <LanguageDisplay language={scriptLanguage} />}
             <ScriptList
                 scripts={scripts}
