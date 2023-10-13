@@ -1,0 +1,12 @@
+.my-custom-input-class {
+    width: 400px;
+    height: 400px; /* Ajusta el valor según tus necesidades */
+}
+
+div:where(.swal2-container) .swal2-input {
+    width: auto;
+    height: 20rem;
+    font-family: monospace;
+    white-space: pre-wrap;
+    overflow: auto; /* Hace que el contenido que exceda el tamaño del input sea desplazable */
+}

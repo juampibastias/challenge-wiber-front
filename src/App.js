@@ -33,58 +33,20 @@ function App() {
             .then((data) => setScripts(data));
     }, []);
 
-    const handleInputChange = (e) => {
-        const script = e.target.value;
-        setNewScript(script);
-
-        // Especifica el lenguaje aquí (por ejemplo, 'javascript' o 'python')
-        const language = Prism.highlight(script, Prism.languages.javascript);
-        setScriptLanguage(language);
-
-        // Validación del script usando Joi
-        const validationSchema = Joi.string().required();
-        const { error } = validationSchema.validate(script);
-
-        if (error) {
-            setValidationError(error.message);
-        } else {
-            setValidationError(null);
-        }
-    };
-
     const handleSubmit = async () => {
         try {
             if (editingScript) {
-                const response = await fetch(
-                    `http://localhost:5000/api/scripts/${editingScript.id}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: scriptName,
-                            script: newScript,
-                        }),
-                    }
-                );
-
-                if (response.ok) {
-                    const updatedScript = await response.json();
-                    setScripts(
-                        scripts.map((script) =>
-                            script.id === editingScript.id
-                                ? updatedScript
-                                : script
-                        )
-                    );
-
-                    setEditingScript(null);
-                    setNewScript('');
-                } else {
-                    console.error('Error al actualizar el script');
-                }
+                // ... (lógica para editar script)
             } else {
+                const currentDate = new Date();
+                const formattedDate = `${currentDate.getDate()}/${
+                    currentDate.getMonth() + 1
+                }/${currentDate.getFullYear().toString().slice(-2)}`; // Formatear la fecha como 'dd/mm/aa'
+
+                const formattedTime = `${currentDate.getHours()}:${(
+                    '0' + currentDate.getMinutes()
+                ).slice(-2)}`; // Formatear la hora como 'hh:mm'
+
                 const response = await fetch(
                     'http://localhost:5000/api/scripts',
                     {
@@ -95,6 +57,8 @@ function App() {
                         body: JSON.stringify({
                             name: scriptName,
                             script: newScript,
+                            date: formattedDate,
+                            time: formattedTime,
                         }),
                     }
                 );
@@ -103,6 +67,7 @@ function App() {
                     const data = await response.json();
                     setScripts([...scripts, data]);
                     setNewScript('');
+                    setScriptName('');
                 } else {
                     console.error('Error al crear el script');
                 }
