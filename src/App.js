@@ -5,102 +5,112 @@ import Joi from 'joi';
 import ScriptForm from './components/ScriptForm';
 import LanguageDisplay from './components/LanguageDisplay';
 import ScriptList from './components/ScriptList';
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 function App() {
     const [scripts, setScripts] = useState([]);
     const [newScript, setNewScript] = useState('');
     const [validationError, setValidationError] = useState(null);
     const [scriptLanguage, setScriptLanguage] = useState(null);
-    const [editingScript, setEditingScript] = useState(null);
+    const [editingScript, setEditingScript] = useState({
+        id: null,
+        name: '',
+        text: '',
+        date: '',
+        time: '',
+        versions: [],
+    });
+
     const [scriptName, setScriptName] = useState('');
 
     const handleEdit = (scriptId) => {
         const scriptToEdit = scripts.find((script) => script.id === scriptId);
-        setEditingScript(scriptToEdit);
-        setNewScript(scriptToEdit.text);
-        setScriptName(scriptToEdit.name); // Asegúrate de establecer el nombre del script
+
+        if (scriptToEdit) {
+            setEditingScript({
+                id: scriptToEdit.id,
+                name: scriptToEdit.name,
+                text: scriptToEdit.text,
+                date: scriptToEdit.date,
+                time: scriptToEdit.time,
+                versions: scriptToEdit.versions,
+            });
+            setNewScript(scriptToEdit.text);
+            setScriptName(scriptToEdit.name);
+        } else {
+            console.error(`Script with id ${scriptId} not found.`);
+        }
     };
 
     useEffect(() => {
-        fetch('http://localhost:5000/api/scripts')
+        fetch('http://localhost:5000/api/scripts', {
+            method: 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+        })
             .then((response) => response.json())
             .then((data) => setScripts(data));
     }, []);
 
-    const handleInputChange = (e) => {
-        const script = e.target.value;
-        setNewScript(script);
-
-        // Especifica el lenguaje aquí (por ejemplo, 'javascript' o 'python')
-        const language = Prism.highlight(script, Prism.languages.javascript);
-        setScriptLanguage(language);
-
-        // Validación del script usando Joi
-        const validationSchema = Joi.string().required();
-        const { error } = validationSchema.validate(script);
-
-        if (error) {
-            setValidationError(error.message);
-        } else {
-            setValidationError(null);
-        }
-    };
-
     const handleSubmit = async () => {
         try {
-            if (editingScript) {
-                // Si hay un script en edición, realiza una solicitud PUT para actualizar el script existente
-                const response = await fetch(
-                    `http://localhost:5000/api/scripts/${editingScript.id}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({ script: newScript }),
-                    }
-                );
+            if (!editingScript) {
+                console.error('Error: editingScript is null or undefined');
+                return;
+            }
 
-                if (response.ok) {
-                    // Si la actualización fue exitosa, actualiza el script en el estado y la lista de scripts
-                    const updatedScript = await response.json();
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.getDate()}/${
+                currentDate.getMonth() + 1
+            }/${currentDate.getFullYear().toString().slice(-2)}`; // Formatear la fecha como 'dd/mm/aa'
+
+            const formattedTime = `${currentDate.getHours()}:${(
+                '0' + currentDate.getMinutes()
+            ).slice(-2)}`; // Formatear la hora como 'hh:mm'
+            // Formatear la hora como 'hh:mm'
+
+            const apiUrl = editingScript.id
+                ? `http://localhost:5000/api/scripts/${editingScript.id}`
+                : 'http://localhost:5000/api/scripts';
+
+            const response = await fetch(apiUrl, {
+                method: editingScript.id ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: scriptName,
+                    text: newScript,
+                    date: formattedDate,
+                    time: formattedTime,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (editingScript.id) {
+                    // Si es una edición, actualiza el script existente en el estado
                     setScripts(
                         scripts.map((script) =>
-                            script.id === editingScript.id
-                                ? updatedScript
-                                : script
+                            script.id === editingScript.id ? data : script
                         )
                     );
-
-                    setEditingScript(null);
-                    setNewScript('');
                 } else {
-                    console.error('Error al actualizar el script');
-                }
-            } else {
-                // Si no hay un script en edición, realiza una solicitud POST para crear un nuevo script
-                const response = await fetch(
-                    'http://localhost:5000/api/scripts',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: scriptName,
-                            script: newScript,
-                        }),
-                    }
-                );
-
-                if (response.ok) {
-                    // Si la creación fue exitosa, agrega el nuevo script al estado de los scripts
-                    const data = await response.json();
+                    // Si es una creación, agrega el nuevo script al estado
                     setScripts([...scripts, data]);
-                    setNewScript('');
-                } else {
-                    console.error('Error al crear el script');
                 }
+
+                // Restablece los estados de edición y nuevos scripts
+                setEditingScript(null);
+                setNewScript('');
+                setScriptName('');
+            } else {
+                console.error(
+                    editingScript.id
+                        ? 'Error al actualizar el script'
+                        : 'Error al crear el script'
+                );
             }
         } catch (error) {
             console.error('Error de red:', error);
@@ -150,7 +160,7 @@ function App() {
                 onChange={(e) => setNewScript(e.target.value)}
                 onSubmit={handleSubmit}
                 error={validationError}
-                onEditClick={handleEdit} // Asegúrate de pasar handleEdit como onEditClick
+                onEditClick={handleEdit}
                 scriptId={editingScript ? editingScript.id : null}
             />
 

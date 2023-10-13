@@ -1,5 +1,8 @@
 import React from 'react';
 import Swal from 'sweetalert2';
+import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
+import { faTrash } from '@fortawesome/free-solid-svg-icons';
+import './ScriptList.css';
 
 function ScriptList({ scripts, onDelete }) {
     const handleEditClick = (scriptId, scriptText) => {
@@ -35,7 +38,8 @@ function ScriptList({ scripts, onDelete }) {
                                 'Script actualizado correctamente.',
                                 'success'
                             );
-                            // También puedes agregar lógica para actualizar el estado si es necesario
+                            // Actualizar el estado si es necesario
+                            // Tu código aquí para actualizar el estado si es necesario
                         } else {
                             // Si hay un error en la solicitud, mostrar SweetAlert de error
                             Swal.fire(
@@ -58,29 +62,102 @@ function ScriptList({ scripts, onDelete }) {
             }
         });
     };
+    const handleDeleteClick = (scriptId, scriptText) => {
+        // Mostrar un SweetAlert para confirmar la eliminación
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: 'Esta acción no se puede deshacer.',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#3085d6',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Sí, eliminarlo',
+            cancelButtonText: 'Cancelar',
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Realizar una solicitud DELETE para eliminar el script en el servidor
+                fetch(`http://localhost:5000/api/scripts/${scriptId}`, {
+                    method: 'DELETE',
+                })
+                    .then((response) => {
+                        if (response.ok) {
+                            // Si la solicitud es exitosa, mostrar SweetAlert de éxito
+                            Swal.fire(
+                                '¡Éxito!',
+                                'Script eliminado correctamente.',
+                                'success'
+                            );
+                            // Actualizar el estado si es necesario
+                            // Tu código aquí para actualizar el estado si es necesario
+                        } else {
+                            // Si hay un error en la solicitud, mostrar SweetAlert de error
+                            Swal.fire(
+                                'Error',
+                                'No se pudo eliminar el script.',
+                                'error'
+                            );
+                        }
+                    })
+                    .catch((error) => {
+                        console.error('Error al eliminar el script:', error);
+                        // Mostrar SweetAlert de error si hay un error en la solicitud
+                        Swal.fire(
+                            'Error',
+                            'No se pudo eliminar el script.',
+                            'error'
+                        );
+                    });
+            }
+        });
+    };
 
     return (
-        <div style={{ marginTop: '5rem' }}>
-            <ul>
-                {scripts.map((script) => (
-                    <li key={script.id}>
-                        <span
-                            onClick={() =>
-                                handleEditClick(script.id, script.text)
-                            }
-                            style={{
-                                cursor: 'pointer',
-                                textDecoration: 'underline',
-                            }}
-                        >
-                            {script.name} {/* Mostrar el nombre del script */}
-                        </span>
-                        <button onClick={() => onDelete(script.id)}>
-                            Eliminar
-                        </button>
-                    </li>
-                ))}
-            </ul>
+        <div className='d-flex justify-content-center align-items-center vh-50 mt-5 mb-5'>
+            <table className='table w-50'>
+                <thead>
+                    <tr>
+                        <th scope='col'>#</th>
+                        <th scope='col'>Nombre</th>
+                        <th scope='col'>Fecha</th>
+                        <th scope='col'>Hora</th>
+                        <th scope='col'>Acciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {scripts.map((script, index) => (
+                        <tr key={script.id}>
+                            <th scope='row'>{index + 1}</th>
+                            <td>
+                                <span
+                                    onClick={() =>
+                                        handleEditClick(script.id, script.text)
+                                    }
+                                    style={{
+                                        cursor: 'pointer',
+                                        textDecoration: 'underline',
+                                    }}
+                                >
+                                    {script.name}
+                                </span>
+                            </td>
+                            <td>{script.date}</td>
+                            <td>{script.time}</td>
+                            <td>
+                                <FontAwesomeIcon
+                                    icon={faTrash}
+                                    onClick={() => {
+                                        handleDeleteClick(script.id);
+                                    }}
+                                    style={{
+                                        cursor: 'pointer',
+                                        color: 'red',
+                                    }}
+                                />
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 }
