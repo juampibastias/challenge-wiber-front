@@ -36,7 +36,37 @@ function App() {
     const handleSubmit = async () => {
         try {
             if (editingScript) {
-                // ... (lógica para editar script)
+                // Si hay un script en edición, realiza una solicitud PUT para actualizar el script existente
+                const response = await fetch(
+                    `http://localhost:5000/api/scripts/${editingScript.id}`,
+                    {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify({
+                            name: scriptName,
+                            script: newScript,
+                        }),
+                    }
+                );
+
+                if (response.ok) {
+                    // Si la actualización fue exitosa, actualiza el script en el estado y la lista de scripts
+                    const updatedScript = await response.json();
+                    setScripts(
+                        scripts.map((script) =>
+                            script.id === editingScript.id
+                                ? updatedScript
+                                : script
+                        )
+                    );
+
+                    setEditingScript(null);
+                    setNewScript('');
+                } else {
+                    console.error('Error al actualizar el script');
+                }
             } else {
                 const currentDate = new Date();
                 const formattedDate = `${currentDate.getDate()}/${
@@ -56,7 +86,7 @@ function App() {
                         },
                         body: JSON.stringify({
                             name: scriptName,
-                            script: newScript,
+                            text: newScript,
                             date: formattedDate,
                             time: formattedTime,
                         }),

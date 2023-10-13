@@ -1,7 +1,16 @@
 import React from 'react';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function ScriptForm({ value, scriptName, onNameChange, onChange, onSubmit }) {
+function ScriptForm({
+    value,
+    scriptName,
+    onNameChange,
+    onChange,
+    onSubmit,
+    error,
+    onEditClick,
+    scriptId,
+}) {
     return (
         <div className='d-flex justify-content-center'>
             <form className='was-validated w-50 justify-content-center'>
