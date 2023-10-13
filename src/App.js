@@ -12,14 +12,34 @@ function App() {
     const [newScript, setNewScript] = useState('');
     const [validationError, setValidationError] = useState(null);
     const [scriptLanguage, setScriptLanguage] = useState(null);
-    const [editingScript, setEditingScript] = useState(null);
+    const [editingScript, setEditingScript] = useState({
+        id: null,
+        name: '',
+        text: '',
+        date: '',
+        time: '',
+        versions: [],
+    });
+
     const [scriptName, setScriptName] = useState('');
 
     const handleEdit = (scriptId) => {
         const scriptToEdit = scripts.find((script) => script.id === scriptId);
-        setEditingScript(scriptToEdit);
-        setNewScript(scriptToEdit.text);
-        setScriptName(scriptToEdit.name); // Asegúrate de establecer el nombre del script
+
+        if (scriptToEdit) {
+            setEditingScript({
+                id: scriptToEdit.id,
+                name: scriptToEdit.name,
+                text: scriptToEdit.text,
+                date: scriptToEdit.date,
+                time: scriptToEdit.time,
+                versions: scriptToEdit.versions,
+            });
+            setNewScript(scriptToEdit.text);
+            setScriptName(scriptToEdit.name);
+        } else {
+            console.error(`Script with id ${scriptId} not found.`);
+        }
     };
 
     useEffect(() => {
@@ -35,72 +55,62 @@ function App() {
 
     const handleSubmit = async () => {
         try {
-            if (editingScript) {
-                // Si hay un script en edición, realiza una solicitud PUT para actualizar el script existente
-                const response = await fetch(
-                    `http://localhost:5000/api/scripts/${editingScript.id}`,
-                    {
-                        method: 'PUT',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: scriptName,
-                            script: newScript,
-                        }),
-                    }
-                );
+            if (!editingScript) {
+                console.error('Error: editingScript is null or undefined');
+                return;
+            }
 
-                if (response.ok) {
-                    // Si la actualización fue exitosa, actualiza el script en el estado y la lista de scripts
-                    const updatedScript = await response.json();
+            const currentDate = new Date();
+            const formattedDate = `${currentDate.getDate()}/${
+                currentDate.getMonth() + 1
+            }/${currentDate.getFullYear().toString().slice(-2)}`; // Formatear la fecha como 'dd/mm/aa'
+
+            const formattedTime = `${currentDate.getHours()}:${(
+                '0' + currentDate.getMinutes()
+            ).slice(-2)}`; // Formatear la hora como 'hh:mm'
+            // Formatear la hora como 'hh:mm'
+
+            const apiUrl = editingScript.id
+                ? `http://localhost:5000/api/scripts/${editingScript.id}`
+                : 'http://localhost:5000/api/scripts';
+
+            const response = await fetch(apiUrl, {
+                method: editingScript.id ? 'PUT' : 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    name: scriptName,
+                    text: newScript,
+                    date: formattedDate,
+                    time: formattedTime,
+                }),
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                if (editingScript.id) {
+                    // Si es una edición, actualiza el script existente en el estado
                     setScripts(
                         scripts.map((script) =>
-                            script.id === editingScript.id
-                                ? updatedScript
-                                : script
+                            script.id === editingScript.id ? data : script
                         )
                     );
-
-                    setEditingScript(null);
-                    setNewScript('');
                 } else {
-                    console.error('Error al actualizar el script');
-                }
-            } else {
-                const currentDate = new Date();
-                const formattedDate = `${currentDate.getDate()}/${
-                    currentDate.getMonth() + 1
-                }/${currentDate.getFullYear().toString().slice(-2)}`; // Formatear la fecha como 'dd/mm/aa'
-
-                const formattedTime = `${currentDate.getHours()}:${(
-                    '0' + currentDate.getMinutes()
-                ).slice(-2)}`; // Formatear la hora como 'hh:mm'
-
-                const response = await fetch(
-                    'http://localhost:5000/api/scripts',
-                    {
-                        method: 'POST',
-                        headers: {
-                            'Content-Type': 'application/json',
-                        },
-                        body: JSON.stringify({
-                            name: scriptName,
-                            text: newScript,
-                            date: formattedDate,
-                            time: formattedTime,
-                        }),
-                    }
-                );
-
-                if (response.ok) {
-                    const data = await response.json();
+                    // Si es una creación, agrega el nuevo script al estado
                     setScripts([...scripts, data]);
-                    setNewScript('');
-                    setScriptName('');
-                } else {
-                    console.error('Error al crear el script');
                 }
+
+                // Restablece los estados de edición y nuevos scripts
+                setEditingScript(null);
+                setNewScript('');
+                setScriptName('');
+            } else {
+                console.error(
+                    editingScript.id
+                        ? 'Error al actualizar el script'
+                        : 'Error al crear el script'
+                );
             }
         } catch (error) {
             console.error('Error de red:', error);
