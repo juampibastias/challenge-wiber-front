@@ -62,11 +62,11 @@ function ScriptList({ scripts, onDelete }) {
             }
         });
     };
-    const handleDeleteClick = (scriptId, scriptText) => {
+    const handleDeleteClick = (scriptId, scriptName) => {
         // Mostrar un SweetAlert para confirmar la eliminación
         Swal.fire({
             title: '¿Estás seguro?',
-            text: 'Esta acción no se puede deshacer.',
+            text: `Estás a punto de eliminar el script "${scriptName}"`,
             icon: 'warning',
             showCancelButton: true,
             confirmButtonColor: '#3085d6',
@@ -75,38 +75,8 @@ function ScriptList({ scripts, onDelete }) {
             cancelButtonText: 'Cancelar',
         }).then((result) => {
             if (result.isConfirmed) {
-                // Realizar una solicitud DELETE para eliminar el script en el servidor
-                fetch(`http://localhost:5000/api/scripts/${scriptId}`, {
-                    method: 'DELETE',
-                })
-                    .then((response) => {
-                        if (response.ok) {
-                            // Si la solicitud es exitosa, mostrar SweetAlert de éxito
-                            Swal.fire(
-                                '¡Éxito!',
-                                'Script eliminado correctamente.',
-                                'success'
-                            );
-                            // Actualizar el estado si es necesario
-                            // Tu código aquí para actualizar el estado si es necesario
-                        } else {
-                            // Si hay un error en la solicitud, mostrar SweetAlert de error
-                            Swal.fire(
-                                'Error',
-                                'No se pudo eliminar el script.',
-                                'error'
-                            );
-                        }
-                    })
-                    .catch((error) => {
-                        console.error('Error al eliminar el script:', error);
-                        // Mostrar SweetAlert de error si hay un error en la solicitud
-                        Swal.fire(
-                            'Error',
-                            'No se pudo eliminar el script.',
-                            'error'
-                        );
-                    });
+                // Llamada a la función onDelete con el ID del script
+                onDelete(scriptId);
             }
         });
     };
