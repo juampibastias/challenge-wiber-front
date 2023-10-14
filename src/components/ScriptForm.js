@@ -11,6 +11,10 @@ function ScriptForm({
     onEditClick,
     scriptId,
 }) {
+    const isEditing = scriptId !== null && scriptId !== undefined;
+
+    const buttonText = isEditing ? 'Editar script' : 'Agregar script';
+
     return (
         <div className='d-flex justify-content-center'>
             <form className='was-validated w-50 justify-content-center'>
@@ -45,9 +49,9 @@ function ScriptForm({
                     <button
                         className='btn btn-primary'
                         type='button'
-                        onClick={onSubmit}
+                        onClick={onSubmit} // No necesitas pasar el script de edición aquí
                     >
-                        Agregar script
+                        {buttonText}
                     </button>
                 </div>
             </form>
