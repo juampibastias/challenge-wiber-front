@@ -12,7 +12,7 @@ function App() {
     const [validationError, setValidationError] = useState(null);
     const [scriptName, setScriptName] = useState('');
     const [editingScript, setEditingScript] = useState(null);
-
+    const [searchTerm, setSearchTerm] = useState('');
     useEffect(() => {
         fetch('http://localhost:5000/api/scripts')
             .then((response) => response.json())
@@ -108,6 +108,25 @@ function App() {
                     alt='Logo'
                 />
             </div>
+            <label
+                htmlFor='scriptNameInput'
+                className='form-label'
+                style={{ display: 'flex', justifyContent: 'center' }}
+            >
+                Busca scripts por su nombre
+            </label>
+            <div
+                className='mb-3'
+                style={{ display: 'flex', justifyContent: 'center' }}
+            >
+                <input
+                    type='text'
+                    className='form-control w-50'
+                    placeholder='Buscar script...'
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+            </div>
             <ScriptForm
                 scriptName={scriptName}
                 onNameChange={(e) => setScriptName(e.target.value)}
@@ -121,7 +140,7 @@ function App() {
             <ScriptList
                 scripts={scripts}
                 onDelete={handleDelete}
-                onEdit={handleEdit}
+                searchTerm={searchTerm}
             />
         </div>
     );

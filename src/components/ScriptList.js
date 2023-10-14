@@ -1,10 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Swal from 'sweetalert2';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faTrash } from '@fortawesome/free-solid-svg-icons';
 import './ScriptList.css';
 
-function ScriptList({ scripts, onDelete }) {
+function ScriptList({ scripts, onDelete, searchTerm }) {
     const handleEditClick = (scriptId, scriptText) => {
         Swal.fire({
             title: 'Editar Script',
@@ -82,7 +82,16 @@ function ScriptList({ scripts, onDelete }) {
     };
 
     return (
-        <div className='d-flex justify-content-center align-items-center vh-50 mt-5 mb-5'>
+        <div className='d-flex flex-column align-items-center vh-100 mt-5 mb-5'>
+            <div className='mb-3 w-50'>
+                <input
+                    type='text'
+                    className='form-control'
+                    placeholder='Buscar script...'
+                    // Estado de término de búsqueda
+                    // Función para actualizar el estado de término de búsqueda
+                />
+            </div>
             <table className='table w-50'>
                 <thead>
                     <tr>
@@ -94,38 +103,50 @@ function ScriptList({ scripts, onDelete }) {
                     </tr>
                 </thead>
                 <tbody>
-                    {scripts.map((script, index) => (
-                        <tr key={script.id}>
-                            <th scope='row'>{index + 1}</th>
-                            <td>
-                                <span
-                                    onClick={() =>
-                                        handleEditClick(script.id, script.text)
-                                    }
-                                    style={{
-                                        cursor: 'pointer',
-                                        textDecoration: 'underline',
-                                    }}
-                                >
-                                    {script.name}
-                                </span>
-                            </td>
-                            <td>{script.date}</td>
-                            <td>{script.time}</td>
-                            <td>
-                                <FontAwesomeIcon
-                                    icon={faTrash}
-                                    onClick={() => {
-                                        handleDeleteClick(script.id);
-                                    }}
-                                    style={{
-                                        cursor: 'pointer',
-                                        color: 'red',
-                                    }}
-                                />
-                            </td>
-                        </tr>
-                    ))}
+                    {scripts
+                        .filter((script) =>
+                            script.name
+                                .toLowerCase()
+                                .includes(searchTerm.toLowerCase())
+                        )
+                        .map((script, index) => (
+                            <tr key={script.id}>
+                                <th scope='row'>{index + 1}</th>
+                                <td>
+                                    <span
+                                        onClick={() =>
+                                            handleEditClick(
+                                                script.id,
+                                                script.text
+                                            )
+                                        }
+                                        style={{
+                                            cursor: 'pointer',
+                                            textDecoration: 'underline',
+                                        }}
+                                    >
+                                        {script.name}
+                                    </span>
+                                </td>
+                                <td>{script.date}</td>
+                                <td>{script.time}</td>
+                                <td>
+                                    <FontAwesomeIcon
+                                        icon={faTrash}
+                                        onClick={() => {
+                                            handleDeleteClick(
+                                                script.id,
+                                                script.name
+                                            );
+                                        }}
+                                        style={{
+                                            cursor: 'pointer',
+                                            color: 'red',
+                                        }}
+                                    />
+                                </td>
+                            </tr>
+                        ))}
                 </tbody>
             </table>
         </div>
